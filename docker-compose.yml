@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5001:5000"
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb+srv://desaishreya658:shreya@cluster0.9nbh2ka.mongodb.net/web_app_db?retryWrites=true&w=majority&appName=Cluster0
+      JWT_SECRET: yourjwtsecret
+    volumes:
+      - ./backend:/app
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
